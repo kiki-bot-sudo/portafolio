@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>División Sintética — Diseño Vertical y Colorido</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-1: #071228;
+      --panel-bg: #ffffff;
+      --muted: #6b7280;
+      --accent-a: #7c5cff;
+      --accent-b: #00d4ff;
+      --accent-c: #ff7a7a;
+      --accent-d: #ffd56b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius:16px;
+      --shadow-lg: 0 20px 70px rgba(2,6,23,0.6);
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:
+        radial-gradient(700px 300px at 10% 10%, rgba(124,92,255,0.07), transparent 8%),
+        radial-gradient(600px 260px at 90% 90%, rgba(0,212,255,0.05), transparent 6%),
+        linear-gradient(180deg,#071227 0%, #071a2f 100%);
+      color:#061025;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+    }
+
+    .frame {
+      width:100%;
+      max-width:720px;
+      border-radius:22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
+      box-shadow: var(--shadow-lg);
+      padding:18px;
+      border:1px solid rgba(12,16,40,0.05);
+      overflow:hidden;
+    }
+
+    /* Vertical stacked header */
+    .header {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .logo {
+      width:88px;
+      height:88px;
+      border-radius:18px;
+      background: linear-gradient(135deg,var(--accent-a),var(--accent-b));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:800;
+      font-size:30px;
+      color:white;
+      box-shadow: 0 12px 34px rgba(124,92,255,0.16);
+    }
+
+    h1 {
+      font-size:1.35rem;
+      font-weight:800;
+      color:#08102a;
+      text-align:center;
+    }
+
+    .meta-info {
+      width:100%;
+      max-width:640px;
+      text-align:center;
+      color:var(--muted);
+      font-size:0.92rem;
+      background: linear-gradient(90deg, rgba(124,92,255,0.03), rgba(0,212,255,0.02));
+      padding:10px 14px;
+      border-radius:12px;
+      border:1px solid rgba(12,16,40,0.03);
+      line-height:1.25;
+    }
+
+    .main {
+      margin-top:12px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .card {
+      background: var(--panel-bg);
+      border-radius:14px;
+      padding:14px;
+      border:1px solid rgba(11,18,32,0.04);
+      box-shadow: 0 6px 30px rgba(2,6,23,0.04);
+    }
+
+    label { display:block; margin-bottom:8px; font-weight:700; color:#08102a; }
+    input[type="text"]{
+      width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(11,18,32,0.06);
+      font-size:0.98rem; outline:none; background:#fff;
+      transition: box-shadow .18s ease, transform .12s ease;
+    }
+    input[type="text"]:focus{
+      box-shadow: 0 12px 30px rgba(124,92,255,0.08);
+      transform: translateY(-2px);
+      border-color: rgba(124,92,255,0.8);
+    }
+
+    .help-text { font-size:0.84rem; color:var(--muted); margin-top:8px; }
+
+    .actions { display:flex; gap:10px; margin-top:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+
+    .btn {
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:10px 14px; border-radius:10px; font-weight:800; cursor:pointer; border:none;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn-primary{
+      background: linear-gradient(90deg,var(--accent-a),var(--accent-b));
+      color:white; box-shadow: 0 10px 30px rgba(124,92,255,0.12);
+      min-width:160px;
+    }
+    .btn-ghost{
+      background:transparent; border:1px solid rgba(11,18,32,0.06); color:var(--muted);
+      min-width:120px;
+    }
+    .btn-accent{
+      background: linear-gradient(90deg,var(--accent-c),var(--accent-d));
+      color:white;
+      min-width:140px;
+    }
+
+    /* Palette vertical list */
+    .palette-list {
+      display:flex; gap:8px; align-items:center;
+    }
+    .swatch {
+      width:34px; height:34px; border-radius:8px; cursor:pointer; border:2px solid rgba(255,255,255,0.6);
+      box-shadow: 0 8px 22px rgba(2,6,23,0.06);
+      transition: transform .12s ease;
+    }
+    .swatch:hover{ transform: translateY(-4px); }
+    .swatch.active{ outline:3px solid rgba(0,0,0,0.06); transform:scale(1.05); }
+
+    /* Result styling vertical */
+    .result-title { font-weight:800; color:#08102a; font-size:1rem; margin-bottom:6px; }
+    .coeff-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+    .coeff-chip { padding:10px 12px; border-radius:10px; background: linear-gradient(180deg, rgba(11,18,32,0.02), rgba(11,18,32,0.01)); border:1px solid rgba(11,18,32,0.04); font-weight:800; min-width:86px; text-align:center; }
+    .process { margin-top:12px; display:flex; flex-direction:column; gap:8px; }
+    .process-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .divisor-pill { padding:8px 10px; border-radius:999px; background: linear-gradient(90deg,var(--accent-c),var(--accent-d)); color:white; font-weight:800; }
+    .num-pill { padding:8px 10px; background:#fff; border-radius:10px; border:1px solid rgba(11,18,32,0.04); font-weight:800; min-width:70px; text-align:center; }
+
+    .final {
+      margin-top:10px; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap;
+    }
+    .badge-c { padding:10px 12px; border-radius:10px; background: linear-gradient(90deg,#f0f9ff,#e6f7ff); color:#08102a; font-weight:800; border:1px solid rgba(11,18,32,0.04); }
+    .badge-r { padding:10px 12px; border-radius:10px; background: linear-gradient(90deg,#fff5f5,#fff1f1); color:var(--danger); font-weight:800; border:1px solid rgba(11,18,32,0.04); }
+
+    .small { font-size:0.86rem; color:var(--muted); }
+
+    @media (max-width:520px){
+      .frame{ padding:14px; border-radius:14px }
+      .logo{ width:72px; height:72px; font-size:26px }
+      .btn-primary, .btn-accent{ min-width:120px }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame" role="main" aria-labelledby="page-title">
+    <div class="header">
+      <div class="logo" aria-hidden="true">Σ</div>
+      <h1 id="page-title">División Sintética de Polinomios</h1>
+
+      <!-- Meta info under title (stacked) -->
+      <div class="meta-info" role="note" aria-label="Información del curso">
+        <strong>Institución:</strong> Tecnológico de Software<br>
+        <strong>Materia:</strong> Fundamentos de Álgebra<br>
+        <strong>Docente:</strong> Jorge Javier Pedroza Romero<br>
+        <strong>Alumno:</strong> Enrique Zavala<br>
+        <strong>Grupo:</strong> C
+      </div>
+    </div>
+
+    <div class="main">
+      <!-- Input card (vertical) -->
+      <div class="card" role="form" aria-labelledby="form-title">
+        <div id="form-title" style="font-weight:800; margin-bottom:10px;">Entrada</div>
+
+        <div style="margin-bottom:12px;">
+          <label for="polinomio">Polinomio</label>
+          <input id="polinomio" type="text" placeholder="Ej: 5x^3 + 3x^2 + 2x + 1 o x^2 - 6x + 11">
+          <div class="help-text">Ingresa el polinomio con notación algebraica. Soporta números complejos (p.ej. 3+2i).</div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label for="raiz">Raíz (divisor)</label>
+          <input id="raiz" type="text" placeholder="Ej: 2 o 1+i">
+          <div class="help-text">Raíz a usar en la división sintética. Soporta a+bi (sin espacios preferibles).</div>
+        </div>
+
+        <div class="actions">
+          <div class="palette-list" aria-hidden="true" title="Cambiar paleta de acentos">
+            <div class="swatch" id="sw-1" style="background: linear-gradient(90deg,#ff7a7a,#ffd56b)"></div>
+            <div class="swatch active" id="sw-2" style="background: linear-gradient(90deg,#7c5cff,#00d4ff)"></div>
+            <div class="swatch" id="sw-3" style="background: linear-gradient(90deg,#6ee7b7,#3b82f6)"></div>
+            <div class="swatch" id="sw-4" style="background: linear-gradient(90deg,#ff7ab6,#ffb86b)"></div>
+          </div>
+
+          <div style="margin-left:auto; display:flex; gap:8px;">
+            <button class="btn btn-primary" id="calcBtn">Calcular</button>
+            <button class="btn btn-ghost" id="clearBtn">Limpiar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result card (vertical) -->
+      <div id="resultado" class="card" aria-live="polite" style="display:none"></div>
+
+      <!-- Placeholder -->
+      <div id="placeholder" class="card" style="text-align:center">
+        <div style="font-weight:800; font-size:1rem; color:#08102a;">Aún no hay resultados</div>
+        <div class="small" style="margin-top:8px;">Introduce un polinomio y una raíz, luego presiona "Calcular".</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ===== Lógica: números complejos, parser y división sintética (mantengo tu lógica) ===== */
+    class NumeroComplejo {
+      constructor(real, imag = 0) {
+        this.real = typeof real === 'number' ? real : parseFloat(real) || 0;
+        this.imag = typeof imag === 'number' ? imag : parseFloat(imag) || 0;
+      }
+      sumar(otro){ return new NumeroComplejo(this.real + otro.real, this.imag + otro.imag); }
+      multiplicar(otro){ return new NumeroComplejo(this.real*otro.real - this.imag*otro.imag, this.real*otro.imag + this.imag*otro.real); }
+      toString(){
+        const r = Math.abs(this.real) < 1e-10 ? 0 : Number(this.real.toFixed(6));
+        const i = Math.abs(this.imag) < 1e-10 ? 0 : Number(this.imag.toFixed(6));
+        if(i === 0) return String(r);
+        const rStr = r === 0 ? '' : String(r);
+        const iAbs = Math.abs(i);
+        const iStr = (iAbs === 1 ? '' : String(iAbs)) + 'i';
+        const sign = i >= 0 ? (r !== 0 ? '+' : '') : '-';
+        return r === 0 ? (i < 0 ? '-' + iStr.replace('-', '') : iStr) : (rStr + sign + iStr.replace('-', ''));
+      }
+      esReal(){ return Math.abs(this.imag) < 1e-10; }
+    }
+
+    function parsearComplejo(str){
+      if(str == null) return new NumeroComplejo(0);
+      str = String(str).trim().replace(/\s+/g,'');
+      if(str === '') return new NumeroComplejo(0);
+      if(str.startsWith('(') && str.endsWith(')')) str = str.slice(1,-1);
+      if(!/[iI]/.test(str)) return new NumeroComplejo(parseFloat(str) || 0, 0);
+      str = str.replace(/I/ig,'i');
+      const parts = str.split(/(?=[+-])/).filter(Boolean);
+      let real = 0, imag = 0;
+      if(parts.length === 1){
+        let im = parts[0].replace(/i/g,'');
+        if(im === '' || im === '+') im = '1';
+        if(im === '-') im = '-1';
+        imag = parseFloat(im) || 0;
+      } else {
+        for(const p of parts){
+          if(p.includes('i')){
+            let im = p.replace(/i/g,'');
+            if(im === '' || im === '+') im = '1';
+            if(im === '-') im = '-1';
+            imag = parseFloat(im) || 0;
+          } else {
+            real = parseFloat(p) || 0;
+          }
+        }
+      }
+      return new NumeroComplejo(real, imag);
+    }
+
+    function parsearPolinomio(str){
+      if(!str) return [new NumeroComplejo(0)];
+      str = String(str).trim().replace(/\s+/g,'');
+      const gradoMatches = [...str.matchAll(/x\^(\d+)/g)].map(m => parseInt(m[1],10));
+      let gradoMax = 0;
+      if(gradoMatches.length) gradoMax = Math.max(...gradoMatches);
+      else if(str.includes('x')) gradoMax = 1;
+      else gradoMax = 0;
+      const coef = new Array(gradoMax+1).fill(null).map(()=> new NumeroComplejo(0));
+      str = str.replace(/(^|[\+\-])x/g, (m,p1) => (p1||'') + '1x');
+      const terminos = str.match(/[+-]?[^+-]+/g) || [];
+      for(let t of terminos){
+        if(!t) continue;
+        let grado = 0;
+        let coefStr = t;
+        if(t.includes('x^')){
+          const parts = t.split('x^');
+          coefStr = parts[0] === '' ? '1' : parts[0];
+          grado = parseInt(parts[1],10);
+        } else if(t.includes('x')){
+          const parts = t.split('x');
+          coefStr = parts[0] === '' ? '1' : parts[0];
+          grado = 1;
+        } else {
+          grado = 0;
+          coefStr = t;
+        }
+        const idx = gradoMax - grado;
+        const parsed = parsearComplejo(coefStr);
+        coef[idx] = coef[idx].sumar(parsed);
+      }
+      return coef;
+    }
+
+    function divisionSintetica(coeficientes, raiz){
+      const n = coeficientes.length;
+      const proceso = [];
+      const resultado = [];
+      proceso.push([...coeficientes]);
+      const filaMul = [null];
+      resultado.push(coeficientes[0]);
+      for(let i=1;i<n;i++){
+        const producto = resultado[i-1].multiplicar(raiz);
+        filaMul.push(producto);
+        const suma = coeficientes[i].sumar(producto);
+        resultado.push(suma);
+      }
+      proceso.push(filaMul);
+      const cociente = resultado.slice(0,-1);
+      const residuo = resultado[resultado.length-1];
+      return { proceso, resultado, cociente, residuo };
+    }
+
+    /* ===== UI behavior ===== */
+    const inputPol = document.getElementById('polinomio');
+    const inputRaiz = document.getElementById('raiz');
+    const btnCalc = document.getElementById('calcBtn');
+    const btnClear = document.getElementById('clearBtn');
+    const resultadoEl = document.getElementById('resultado');
+    const placeholder = document.getElementById('placeholder');
+
+    function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+    function formatearTermino(coef, exp){
+      const s = coef.toString();
+      if(s === '0') return '';
+      if(exp === 0) return '('+s+')';
+      if(exp === 1) return '('+s+')x';
+      return '('+s+')x^'+exp;
+    }
+
+    function mostrarResultado(res, coeficientes, raiz, polinomioOriginal){
+      let html = '';
+      html += '<div class="result-title">Resultado</div>';
+      html += '<div class="small" style="margin-top:8px;">Polinomio: <strong>' + escapeHtml(polinomioOriginal) + '</strong></div>';
+
+      html += '<div class="small" style="margin-top:10px;">Coeficientes (mayor → menor)</div>';
+      html += '<div class="coeff-row">';
+      coeficientes.forEach((c,i)=>{
+        const exp = coeficientes.length - 1 - i;
+        html += '<div class="coeff-chip"><div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">' + (exp===0?'const':(exp===1?'x':'x^'+exp)) + '</div>' + escapeHtml(c.toString()) + '</div>';
+      });
+      html += '</div>';
+
+      html += '<div class="process">';
+      html += '<div class="process-row"><div class="divisor-pill">Divisor: ' + escapeHtml(raiz.toString()) + '</div></div>';
+
+      html += '<div class="process-row"><div class="small" style="min-width:160px;color:var(--muted)">Multiplicar y bajar</div>';
+      res.proceso[1].forEach(p => { html += '<div class="num-pill">' + (p ? escapeHtml(p.toString()) : '-') + '</div>'; });
+      html += '</div>';
+
+      html += '<div class="process-row"><div class="small" style="min-width:160px;color:var(--muted)">Resultado (sumar)</div>';
+      res.resultado.forEach(r => { html += '<div class="num-pill">' + escapeHtml(r.toString()) + '</div>'; });
+      html += '</div>';
+      html += '</div>';
+
+      // cociente y residuo
+      let cocStr = '';
+      for(let i=0;i<res.cociente.length;i++){
+        const exp = res.cociente.length - 1 - i;
+        const term = formatearTermino(res.cociente[i], exp);
+        if(term) cocStr += (cocStr ? ' + ' : '') + term;
+      }
+      if(!cocStr) cocStr = '0';
+
+      html += '<div class="final">';
+      html += '<div style="flex:1"><div class="small">Cociente</div><div class="badge-c" style="margin-top:8px;">' + escapeHtml(cocStr) + '</div></div>';
+      html += '<div style="min-width:160px"><div class="small">Residuo</div><div class="badge-r" style="margin-top:8px;">' + escapeHtml(res.residuo.toString()) + '</div>';
+      if(res.residuo.esReal() && Math.abs(res.residuo.real) < 1e-10){
+        html += '<div style="margin-top:8px;color:var(--success);font-weight:800">✓ División exacta</div>';
+      }
+      html += '</div></div>';
+
+      html += '<div style="display:flex; gap:8px; justify-content:flex-end; margin-top:10px;"><button id="copyRes" class="btn btn-accent">Copiar resultado</button></div>';
+
+      resultadoEl.innerHTML = html;
+      resultadoEl.style.display = 'block';
+      placeholder.style.display = 'none';
+
+      document.getElementById('copyRes').addEventListener('click', ()=>{
+        const text = 'Polinomio: ' + polinomioOriginal + ' | Cociente: ' + cocStr + ' | Residuo: ' + res.residuo.toString();
+        navigator.clipboard?.writeText(text).then(()=>{
+          const btn = document.getElementById('copyRes');
+          btn.textContent = 'Copiado ✓';
+          setTimeout(()=> btn.textContent = 'Copiar resultado', 1400);
+        }).catch(()=>{});
+      });
+    }
+
+    function mostrarError(msg){
+      resultadoEl.innerHTML = '<div style="font-weight:800;color:var(--danger)">Error</div><div class="small" style="margin-top:8px;color:var(--muted)">' + escapeHtml(msg) + '</div>';
+      resultadoEl.style.display = 'block';
+      placeholder.style.display = 'none';
+    }
+
+    function calcularDivision(){
+      try{
+        const polinomioStr = inputPol.value.trim();
+        const raizStr = inputRaiz.value.trim();
+        if(!polinomioStr || !raizStr) throw new Error('Por favor ingresa el polinomio y la raíz/divisor.');
+        const coeficientes = parsearPolinomio(polinomioStr);
+        const raiz = parsearComplejo(raizStr);
+        const resultado = divisionSintetica(coeficientes, raiz);
+        mostrarResultado(resultado, coeficientes, raiz, polinomioStr);
+      }catch(e){
+        mostrarError(e.message || String(e));
+      }
+    }
+
+    btnCalc.addEventListener('click', calcularDivision);
+    btnClear.addEventListener('click', ()=>{
+      inputPol.value = '';
+      inputRaiz.value = '';
+      resultadoEl.style.display = 'none';
+      placeholder.style.display = 'block';
+    });
+
+    [inputPol, inputRaiz].forEach(el => el.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); calcularDivision(); }}));
+
+    // Palette swatches (change accents)
+    const sw1 = document.getElementById('sw-1');
+    const sw2 = document.getElementById('sw-2');
+    const sw3 = document.getElementById('sw-3');
+    const sw4 = document.getElementById('sw-4');
+    const swatches = [sw1, sw2, sw3, sw4];
+
+    function setActiveSwatch(active){
+      swatches.forEach(s => s.classList.remove('active'));
+      active.classList.add('active');
+    }
+
+    sw1.addEventListener('click', ()=> {
+      setActiveSwatch(sw1);
+      document.documentElement.style.setProperty('--accent-a','#ff7a7a');
+      document.documentElement.style.setProperty('--accent-b','#ffd56b');
+      document.documentElement.style.setProperty('--accent-c','#7c5cff');
+      document.documentElement.style.setProperty('--accent-d','#00d4ff');
+    });
+    sw2.addEventListener('click', ()=> {
+      setActiveSwatch(sw2);
+      document.documentElement.style.setProperty('--accent-a','#7c5cff');
+      document.documentElement.style.setProperty('--accent-b','#00d4ff');
+      document.documentElement.style.setProperty('--accent-c','#ff7a7a');
+      document.documentElement.style.setProperty('--accent-d','#ffd56b');
+    });
+    sw3.addEventListener('click', ()=> {
+      setActiveSwatch(sw3);
+      document.documentElement.style.setProperty('--accent-a','#6ee7b7');
+      document.documentElement.style.setProperty('--accent-b','#3b82f6');
+      document.documentElement.style.setProperty('--accent-c','#ff7a7a');
+      document.documentElement.style.setProperty('--accent-d','#ffd56b');
+    });
+    sw4.addEventListener('click', ()=> {
+      setActiveSwatch(sw4);
+      document.documentElement.style.setProperty('--accent-a','#ff7ab6');
+      document.documentElement.style.setProperty('--accent-b','#ffb86b');
+      document.documentElement.style.setProperty('--accent-c','#7c5cff');
+      document.documentElement.style.setProperty('--accent-d','#00d4ff');
+    });
+
+    // Initial example
+    inputPol.value = 'x^3 - 6x^2 + 11x - 6';
+    inputRaiz.value = '1';
+    // no automatic calculation; user presses Calcular
+  </script>
+</body>
+</html>

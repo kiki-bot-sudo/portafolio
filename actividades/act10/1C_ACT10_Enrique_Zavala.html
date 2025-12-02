@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculadora de Productos Notables</title>
+
+  <!-- Fuentes (decoración): Inter + Kalam para tema Pizarrón -->
+  https://fonts.googleapis.com
+  https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Kalam:wght@400;700&display=swap
+
+  <!-- Math.js (expansión algebraica) -->
+  https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js</script>
+
+  <style>
+    /* =========================
+       BASE DEL SITIO
+       ========================= */
+    :root {
+      --text-secondary: #475569;
+      --primary-color: #2563eb;
+      --accent-color: #22c55e;
+      --danger-color: #ef4444;
+      --border-color: #e5e7eb;
+      --card-background: #ffffff;
+      --shadow: 0 10px 25px rgba(2,6,23,0.08);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      background: #f6f7fb;
+      color: #0f172a;
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      transition: background .5s ease, color .3s ease;
+      min-height: 100dvh;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      margin-bottom: 16px;
+      position: relative;
+    }
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 2.1rem;
+      line-height: 1.1;
+      letter-spacing: .5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 14px rgba(2,6,23,0.15);
+    }
+    .subtitle { margin: 0 0 10px 0; color: var(--text-secondary); }
+
+    .theme-switcher {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .theme-switcher span {
+      color: var(--text-secondary);
+      font-size: .95rem;
+    }
+    .chip {
+      appearance: none;
+      border: 1px solid var(--border-color);
+      background: var(--card-background);
+      color: inherit;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: .9rem;
+      transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, background .2s ease;
+      box-shadow: var(--shadow);
+    }
+    .chip:hover { transform: translateY(-1px); }
+    .chip.active {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary-color) 25%, transparent);
+    }
+
+    .controls, .result-card, .historial-container, .visualization {
+      background: var(--card-background);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      padding: 20px;
+      margin-top: 16px;
+      animation: floatUp .5s ease both;
+    }
+    @keyframes floatUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .controls .form-group { margin-bottom: 14px; }
+    .controls label { display: block; margin-bottom: 6px; font-weight: 600; }
+    .input-field, select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: white;
+      font-size: 1rem;
+      outline: none;
+      transition: box-shadow .15s ease, border-color .2s ease;
+    }
+    .input-field:focus, select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+    .input-hint {
+      display: block;
+      font-size: .85rem;
+      color: var(--text-secondary);
+      margin-top: 6px;
+    }
+
+    .inputs-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .btn-primary, .btn-secondary {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow);
+      transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+      cursor: pointer;
+      padding: 10px 16px;
+      font-weight: 600;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), color-mix(in oklab, var(--primary-color) 75%, var(--accent-color)));
+      color: white;
+    }
+    .btn-primary:hover { transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, .25); }
+
+    .btn-secondary {
+      background: color-mix(in oklab, var(--danger-color) 86%, black 8%);
+      color: white;
+      border: none;
+    }
+    .btn-secondary:hover { filter: brightness(1.05); transform: translateY(-1px); }
+    .btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(239,68,68,.25); }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .result-card h2, .visualization h2, .historial-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 0;
+    }
+
+    .expression, .formula, .steps, .expression-result, .numeric-result, .verification {
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    .verification.correcto { color: var(--accent-color); font-weight: 700; }
+    .verification.incorrecto { color: var(--danger-color); font-weight: 700; }
+
+    /* Visualización */
+    .visualization h2 { font-size: 1.5rem; margin-bottom: 12px; }
+    #canvas-geometrico {
+      border: 2px solid var(--border-color);
+      border-radius: 14px;
+      margin: 10px auto;
+      display: block;
+      background: white;
+      box-shadow: var(--shadow);
+    }
+    .geo-description {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-top: 10px;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* Historial */
+    .historial-container { padding: 20px; }
+    .historial-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .historial {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .historial-item {
+      padding: 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent-color);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .historial-item strong { color: var(--primary-color); }
+    .historial-item:hover {
+      transform: translateX(2px);
+      box-shadow: 0 10px 20px rgba(2,6,23,.12);
+    }
+    .historial-vacio {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 20px;
+      font-style: italic;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 0 10px;
+      margin-top: 10px;
+      color: var(--text-secondary);
+      border-top: 2px solid var(--border-color);
+      font-size: .95rem;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .results { grid-template-columns: 1fr; }
+      .inputs-container { grid-template-columns: 1fr; }
+      .historial-header { flex-direction: column; align-items: flex-start; }
+      .btn-secondary { width: 100%; }
+    }
+
+    /* Animaciones de entrada suaves */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .result-card { animation: fadeIn 0.5s ease-out; }
+    .historial-item { animation: fadeIn 0.3s ease-out; }
+
+    /* =========================
+       THEMES EXTRA (Glass/Chalk/Neon)
+       ========================= */
+    body[data-theme="glass"], body:not([data-theme]) {
+      --text-secondary: #475569;
+      --primary-color: #2563eb;
+      --accent-color: #22c55e;
+      --danger-color: #ef4444;
+      --border-color: rgba(15, 23, 42, 0.08);
+      --card-background: rgba(255,255,255,0.65);
+      --shadow: 0 8px 24px rgba(2,6,23,.12);
+    }
+    body[data-theme="glass"] .container {
+      background:
+        radial-gradient(1200px 600px at -10% -10%, rgba(34,197,94,.18), transparent 50%),
+        radial-gradient(900px 500px at 110% 10%, rgba(37,99,235,.18), transparent 45%);
+      border-radius: 16px;
+    }
+
+    /* Pizarrón */
+    body[data-theme="chalk"] {
+      background: #122917;
+      color: #f1f5f9;
+    }
+    body[data-theme="chalk"] .container {
+      background:
+        radial-gradient(600px 400px at 20% 10%, rgba(255,255,255,.04), transparent 60%),
+        radial-gradient(500px 350px at 80% 20%, rgba(255,255,255,.03), transparent 60%);
+      background-color: #0f2214;
+      border-radius: 16px;
+    }
+    body[data-theme="chalk"] .result-card,
+    body[data-theme="chalk"] .historial-container,
+    body[data-theme="chalk"] .controls {
+      border: 1.5px dashed rgba(255,255,255,.35);
+      background: rgba(255,255,255,0.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    }
+    body[data-theme="chalk"] header h1,
+    body[data-theme="chalk"] .result-card h2,
+    body[data-theme="chalk"] .visualization h2,
+    body[data-theme="chalk"] .historial-header h2 {
+      font-family: 'Kalam', cursive;
+      text-shadow: 0 1px 0 rgba(0,0,0,.35), 0 0 18px rgba(255,255,255,.05);
+    }
+    body[data-theme="chalk"] #canvas-geometrico {
+      background: #0e1f12;
+      border: 1.5px dashed rgba(255,255,255,.25);
+    }
+
+    /* Neón */
+    body[data-theme="neon"] {
+      background: #0b1220;
+      color: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --primary-color: #7c3aed;
+      --accent-color: #22d3ee;
+      --danger-color: #fb7185;
+      --border-color: rgba(124, 58, 237, .35);
+      --card-background: rgba(17, 24, 39, 0.6);
+      --shadow: 0 10px 30px rgba(124, 58, 237, .18);
+    }
+    body[data-theme="neon"] .result-card,
+    body[data-theme="neon"] .historial-container,
+    body[data-theme="neon"] .controls {
+      border-color: rgba(124,58,237,.45);
+      box-shadow:
+        0 0 0 1px rgba(124,58,237,.35),
+        0 10px 30px rgba(124,58,237,.22);
+    }
+    body[data-theme="neon"] #canvas-geometrico {
+      background: #0a0f1a;
+      box-shadow:
+        inset 0 0 0 1px rgba(124,58,237,.35),
+        0 12px 28px rgba(124,58,237,.24);
+    }
+
+    /* Scrollbar */
+    *::-webkit-scrollbar { width: 10px; height: 10px; }
+    *::-webkit-scrollbar-thumb {
+      background: color-mix(in oklab, var(--primary-color) 50%, #64748b);
+      border-radius: 999px;
+    }
+    *::-webkit-scrollbar-track { background: transparent; }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1>Calculadora de Productos Notables</h1>
+      <p class="subtitle">Actividad #10 - Unidad II</p>
+
+      <div style="margin-top: 6px; line-height: 1.6;">
+        <strong>Institución:</strong> Tecnológico de Software<br>
+        <strong>Materia:</strong> Fundamento de Álgebra<br>
+        <strong>Docente:</strong> Jorge Javier Pedroza Romero<br>
+        <strong>Alumno:</strong> Enrique Zavala<br>
+        <strong>Grupo:</strong> C
+      </div>
+
+      <div class="theme-switcher">
+        <span>Tema:</span>
+        <button type="button" class="chip active" data-theme="glass">Glass</button>
+        <button type="button" class="chip" data-theme="chalk">Pizarrón</button>
+        <button type="button" class="chip" data-theme="neon">Neón</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="controls">
+        <div class="form-group">
+          <label for="modo">Modo de Cálculo:</label>
+          <select id="modo" class="input-field">
+            <option value="numerico">Numérico (solo números)</option>
+            <option value="algebraico">Algebraico (con variables)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tipo">Tipo de Producto Notable:</label>
+          <select id="tipo" class="input-field">
+            <option value="binomio-cuadrado-suma">Binomio al Cuadrado (a + b)²</option>
+            <option value="binomio-cuadrado-resta">Binomio al Cuadrado (a - b)²</option>
+            <option value="binomio-cubo-suma">Binomio al Cubo (a + b)³</option>
+            <option value="binomio-cubo-resta">Binomio al Cubo (a - b)³</option>
+            <option value="termino-comun">Término Común (x + a)(x + b)</option>
+            <option value="conjugados">Binomios Conjugados (a + b)(a - b)</option>
+          </select>
+        </div>
+
+        <div class="inputs-container">
+          <div class="form-group">
+            <label for="valor-a">Valor de a:</label>
+            <input type="text" id="valor-a" class="input-field" value="3" placeholder="Ej: 3 o 3x">
+            <small class="input-hint">Numérico: 3 | Algebraico: 3x, 5y</small>
+          </div>
+
+          <div class="form-group">
+            <label for="valor-b">Valor de b:</label>
+            <input type="text" id="valor-b" class="input-field" value="2" placeholder="Ej: 2 o 5y">
+            <small class="input-hint">Numérico: 2 | Algebraico: 5y, 2z</small>
+          </div>
+        </div>
+
+        <button id="calcular" class="btn-primary" style="margin-top: 10px;">Calcular</button>
+      </section>
+
+      <section class="results">
+        <div class="result-card">
+          <h2>Expresión Original</h2>
+          <div id="expresion-original" class="expression">-</div>
+        </div>
+
+        <div class="result-card">
+          <h2>Fórmula Aplicada</h2>
+          <div id="formula" class="formula">-</div>
+        </div>
+
+        <div class="result-card" style="grid-column: 1 / -1;">
+          <h2>Desarrollo Paso a Paso</h2>
+          <div id="desarrollo" class="steps">-</div>
+        </div>
+
+        <div class="result-card">
+          <h2>Forma Expandida</h2>
+          <div id="expandida" class="expression-result">-</div>
+        </div>
+
+        <div class="result-card">
+          <h2>Resultado Numérico</h2>
+          <div id="resultado-numerico" class="numeric-result">-</div>
+        </div>
+
+        <div class="result-card" style="grid-column: 1 / -1;">
+          <h2>Verificación</h2>
+          <div id="verificacion" class="verification">-</div>
+        </div>
+      </section>
+
+      <section class="visualization">
+        <h2>Representación Geométrica</h2>
+        <canvas id="canvas-geometrico" width="400" height="360"></canvas>
+        <p id="descripcion-geometrica" class="geo-description"></p>
+      </section>
+
+      <section class="historial-container">
+        <div class="historial-header">
+          <h2>Historial de Cálculos</h2>
+          <button id="limpiar-historial" class="btn-secondary">Limpiar</button>
+        </div>
+        <div id="historial" class="historial"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 - Fundamentos de Álgebra - TSU en Desarrollo de Software</p>
+    </footer>
+  </div>
+
+  <script>
+    // =========================
+    // Estado / referencias DOM
+    // =========================
+    let historialCalculos = [];
+
+    const btnCalcular = document.getElementById('calcular');
+    const selectTipo = document.getElementById('tipo');
+    const selectModo = document.getElementById('modo');
+    const inputA = document.getElementById('valor-a');
+    const inputB = document.getElementById('valor-b');
+    const btnLimpiarHistorial = document.getElementById('limpiar-historial');
+
+    const expresionOriginal = document.getElementById('expresion-original');
+    const formula = document.getElementById('formula');
+    const desarrollo = document.getElementById('desarrollo');
+    const expandida = document.getElementById('expandida');
+    const resultadoNumerico = document.getElementById('resultado-numerico');
+    const verificacion = document.getElementById('verificacion');
+    const canvas = document.getElementById('canvas-geometrico');
+    const descripcionGeometrica = document.getElementById('descripcion-geometrica');
+    const historial = document.getElementById('historial');
+
+    // =========================
+    // Eventos iniciales
+    // =========================
+    btnCalcular.addEventListener('click', calcular);
+    btnLimpiarHistorial.addEventListener('click', limpiarHistorial);
+    selectModo.addEventListener('change', actualizarPlaceholders);
+
+    window.addEventListener('load', () => {
+      cargarHistorial();
+      mostrarHistorial();
+      actualizarPlaceholders();
+
+      // Theme switcher init
+      (function() {
+        const container = document.querySelector('.theme-switcher');
+        if (!container) return;
+        const chips = container.querySelectorAll('.chip');
+        const saved = localStorage.getItem('themePN') || 'glass';
+        document.body.dataset.theme = saved;
+        chips.forEach(c => c.classList.toggle('active', c.dataset.theme === saved));
+        chips.forEach(chip => {
+          chip.addEventListener('click', () => {
+            const theme = chip.dataset.theme;
+            document.body.dataset.theme = theme;
+            localStorage.setItem('themePN', theme);
+            chips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+          });
+        });
+      })();
+    });
+
+    function actualizarPlaceholders() {
+      const modo = selectModo.value;
+      if (modo === 'numerico') {
+        inputA.placeholder = 'Ej: 3';
+        inputB.placeholder = 'Ej: 2';
+        if (!/[^0-9.\-]/.test(inputA.value)) inputA.value ||= '3';
+        if (!/[^0-9.\-]/.test(inputB.value)) inputB.value ||= '2';
+      } else {
+        inputA.placeholder = 'Ej: 3x';
+        inputB.placeholder = 'Ej: 5y';
+        if (!/[a-zA-Z]/.test(inputA.value)) inputA.value = '3x';
+        if (!/[a-zA-Z]/.test(inputB.value)) inputB.value = '5y';
+      }
+    }
+
+    // =========================
+    // Calcular
+    // =========================
+    function calcular() {
+      const tipo = selectTipo.value;
+      const modo = selectModo.value;
+      const a = inputA.value.trim();
+      const b = inputB.value.trim();
+
+      if (!a || !b) {
+        alert('Por favor ingresa valores en ambos campos');
+        return;
+      }
+
+      try {
+        let resultado;
+        if (modo === 'numerico') {
+          resultado = calcularNumerico(tipo, a, b);
+        } else {
+          resultado = calcularAlgebraico(tipo, a, b);
+        }
+
+        mostrarResultados(resultado);
+
+        if (modo === 'numerico') {
+          dibujarGeometria(tipo, parseFloat(a), parseFloat(b), resultado);
+        } else {
+          limpiarCanvas();
+        }
+
+        agregarAlHistorial(resultado);
+      } catch (error) {
+        alert('Error en el cálculo: ' + error.message);
+        console.error(error);
+      }
+    }
+
+    // =========================
+    // Numérico
+    // =========================
+    function calcularNumerico(tipo, aStr, bStr) {
+      const a = parseFloat(aStr);
+      const b = parseFloat(bStr);
+      if (isNaN(a) || isNaN(b)) throw new Error('Los valores deben ser numéricos');
+
+      switch (tipo) {
+        case 'binomio-cuadrado-suma':  return binomioCuadradoSumaNumerico(a, b);
+        case 'binomio-cuadrado-resta': return binomioCuadradoRestaNumerico(a, b);
+        case 'binomio-cubo-suma':      return binomioCuboSumaNumerico(a, b);
+        case 'binomio-cubo-resta':     return binomioCuboRestaNumerico(a, b);
+        case 'termino-comun':          return terminoComunNumerico(a, b);
+        case 'conjugados':             return conjugadosNumerico(a, b);
+        default: throw new Error('Tipo no soportado');
+      }
+    }
+
+    function binomioCuadradoSumaNumerico(a, b) {
+      const a2 = a * a, b2 = b * b, dosab = 2 * a * b;
+      const resultadoFinal = a2 + dosab + b2;
+      const resultadoDirecto = (a + b) * (a + b);
+
+      return {
+        tipo: 'Binomio al Cuadrado (Suma)',
+        expresion: `(${a} + ${b})²`,
+        formula: '(a + b)² = a² + 2ab + b²',
+        pasos: [
+          `a² = ${a}² = ${a2}`,
+          `2ab = 2(${a})(${b}) = ${dosab}`,
+          `b² = ${b}² = ${b2}`,
+          `Suma: ${a2} + ${dosab} + ${b2} = ${resultadoFinal}`
+        ],
+        expandida: `${a2} + ${dosab} + ${b2}`,
+        numerico: resultadoFinal.toFixed(4),
+        verificacion: Math.abs(resultadoFinal - resultadoDirecto) < 1e-10,
+        resultadoDirecto: resultadoDirecto.toFixed(4)
+      };
+    }
+
+    function binomioCuadradoRestaNumerico(a, b) {
+      const a2 = a * a, b2 = b * b, dosab = 2 * a * b;
+      const resultadoFinal = a2 - dosab + b2;
+      const resultadoDirecto = (a - b) * (a - b);
+
+      return {
+        tipo: 'Binomio al Cuadrado (Resta)',
+        expresion: `(${a} - ${b})²`,
+        formula: '(a - b)² = a² - 2ab + b²',
+        pasos: [
+          `a² = ${a}² = ${a2}`,
+          `-2ab = -2(${a})(${b}) = ${-dosab}`,
+          `b² = ${b}² = ${b2}`,
+          `Suma: ${a2} - ${dosab} + ${b2} = ${resultadoFinal}`
+        ],
+        expandida: `${a2} - ${dosab} + ${b2}`,
+        numerico: resultadoFinal.toFixed(4),
+        verificacion: Math.abs(resultadoFinal - resultadoDirecto) < 1e-10,
+        resultadoDirecto: resultadoDirecto.toFixed(4)
+      };
+    }
+
+    function binomioCuboSumaNumerico(a, b) {
+      const a3 = a*a*a, a2b3 = 3*a*a*b, ab23 = 3*a*b*b, b3 = b*b*b;
+      const resultadoFinal = a3 + a2b3 + ab23 + b3;
+      const resultadoDirecto = (a + b) * (a + b) * (a + b);
+
+      return {
+        tipo: 'Binomio al Cubo (Suma)',
+        expresion: `(${a} + ${b})³`,
+        formula: '(a + b)³ = a³ + 3a²b + 3ab² + b³',
+        pasos: [
+          `a³ = ${a}³ = ${a3}`,
+          `3a²b = 3(${a}²)(${b}) = ${a2b3}`,
+          `3ab² = 3(${a})(${b}²) = ${ab23}`,
+          `b³ = ${b}³ = ${b3}`,
+          `Suma: ${a3} + ${a2b3} + ${ab23} + ${b3} = ${resultadoFinal}`
+        ],
+        expandida: `${a3} + ${a2b3} + ${ab23} + ${b3}`,
+        numerico: resultadoFinal.toFixed(4),
+        verificacion: Math.abs(resultadoFinal - resultadoDirecto) < 1e-10,
+        resultadoDirecto: resultadoDirecto.toFixed(4)
+      };
+    }
+
+    function binomioCuboRestaNumerico(a, b) {
+      const a3 = a*a*a, a2b3 = 3*a*a*b, ab23 = 3*a*b*b, b3 = b*b*b;
+      const resultadoFinal = a3 - a2b3 + ab23 - b3;
+      const resultadoDirecto = (a - b) * (a - b) * (a - b);
+
+      return {
+        tipo: 'Binomio al Cubo (Resta)',
+        expresion: `(${a} - ${b})³`,
+        formula: '(a - b)³ = a³ - 3a²b + 3ab² - b³',
+        pasos: [
+          `a³ = ${a}³ = ${a3}`,
+          `3a²b = 3(${a}²)(${b}) = ${a2b3}`,
+          `3ab² = 3(${a})(${b}²) = ${ab23}`,
+          `b³ = ${b}³ = ${b3}`,
+          `Alternar signos: ${a3} - ${a2b3} + ${ab23} - ${b3} = ${resultadoFinal}`
+        ],
+        expandida: `${a3} - ${a2b3} + ${ab23} - ${b3}`,
+        numerico: resultadoFinal.toFixed(4),
+        verificacion: Math.abs(resultadoFinal - resultadoDirecto) < 1e-10,
+        resultadoDirecto: resultadoDirecto.toFixed(4)
+      };
+    }
+
+    function terminoComunNumerico(a, b) {
+      // Se muestra la forma general y se evalúa para x=1 como referencia
+      const x2 = 1;
+      const sumaAB = a + b;
+      const productoAB = a * b;
+      const resultadoFinal = x2 + sumaAB + productoAB;
+      const resultadoDirecto = (1 + a) * (1 + b);
+
+      return {
+        tipo: 'Término Común',
+        expresion: `(x + ${a})(x + ${b})`,
+        formula: '(x + a)(x + b) = x² + (a+b)x + ab',
+        pasos: [
+          `x² = 1`,
+          `(a + b)x = (${a} + ${b})x = ${sumaAB}x`,
+          `ab = (${a})(${b}) = ${productoAB}`,
+          `Resultado: x² + ${sumaAB}x + ${productoAB}`
+        ],
+        expandida: `x² + ${sumaAB}x + ${productoAB}`,
+        numerico: `Para x=1: ${resultadoFinal.toFixed(4)}`,
+        verificacion: Math.abs(resultadoFinal - resultadoDirecto) < 1e-10,
+        resultadoDirecto: resultadoDirecto.toFixed(4)
+      };
+    }
+
+    function conjugadosNumerico(a, b) {
+      const a2 = a*a, b2 = b*b;
+      const resultadoFinal = a2 - b2;
+      const resultadoDirecto = (a + b) * (a - b);
+
+      return {
+        tipo: 'Binomios Conjugados',
+        expresion: `(${a} + ${b})(${a} - ${b})`,
+        formula: '(a + b)(a - b) = a² - b²',
+        pasos: [
+          `a² = ${a}² = ${a2}`,
+          `b² = ${b}² = ${b2}`,
+          `Restar: a² - b² = ${a2} - ${b2} = ${resultadoFinal}`
+        ],
+        expandida: `${a2} - ${b2}`,
+        numerico: resultadoFinal.toFixed(4),
+        verificacion: Math.abs(resultadoFinal - resultadoDirecto) < 1e-10,
+        resultadoDirecto: resultadoDirecto.toFixed(4)
+      };
+    }
+
+    // =========================
+    // Algebraico (Math.js)
+    // =========================
+    function calcularAlgebraico(tipo, a, b) {
+      try {
+        switch (tipo) {
+          case 'binomio-cuadrado-suma':  return binomioCuadradoSumaAlgebraico(a, b);
+          case 'binomio-cuadrado-resta': return binomioCuadradoRestaAlgebraico(a, b);
+          case 'binomio-cubo-suma':      return binomioCuboSumaAlgebraico(a, b);
+          case 'binomio-cubo-resta':     return binomioCuboRestaAlgebraico(a, b);
+          case 'termino-comun':          return terminoComunAlgebraico(a, b);
+          case 'conjugados':             return conjugadosAlgebraico(a, b);
+          default: throw new Error('Tipo no soportado');
+        }
+      } catch (err) {
+        throw new Error('Error en cálculo algebraico: ' + err.message);
+      }
+    }
+
+    function expandOrSimplify(expr) {
+      try {
+        return (math.expand ? math.expand(expr) : math.simplify(expr)).toString();
+      } catch {
+        return math.simplify(expr).toString();
+      }
+    }
+
+    function binomioCuadradoSumaAlgebraico(a, b) {
+      const expr = `(${a} + ${b})^2`;
+      const expandido = expandOrSimplify(expr);
+      return {
+        tipo: 'Binomio al Cuadrado (Suma)',
+        expresion: `(${a} + ${b})²`,
+        formula: '(a + b)² = a² + 2ab + b²',
+        pasos: [
+          `Expresión: (${a} + ${b})²`,
+          `Aplicar fórmula y expandir`,
+          `Simplificar términos semejantes`
+        ],
+        expandida: expandido,
+        numerico: 'Modo algebraico',
+        verificacion: true,
+        resultadoDirecto: expandido
+      };
+    }
+
+    function binomioCuadradoRestaAlgebraico(a, b) {
+      const expr = `(${a} - ${b})^2`;
+      const expandido = expandOrSimplify(expr);
+      return {
+        tipo: 'Binomio al Cuadrado (Resta)',
+        expresion: `(${a} - ${b})²`,
+        formula: '(a - b)² = a² - 2ab + b²',
+        pasos: [
+          `Expresión: (${a} - ${b})²`,
+          `Aplicar fórmula y expandir`,
+          `Simplificar términos semejantes`
+        ],
+        expandida: expandido,
+        numerico: 'Modo algebraico',
+        verificacion: true,
+        resultadoDirecto: expandido
+      };
+    }
+
+    function binomioCuboSumaAlgebraico(a, b) {
+      const expr = `(${a} + ${b})^3`;
+      const expandido = expandOrSimplify(expr);
+      return {
+        tipo: 'Binomio al Cubo (Suma)',
+        expresion: `(${a} + ${b})³`,
+        formula: '(a + b)³ = a³ + 3a²b + 3ab² + b³',
+        pasos: [
+          `Expresión: (${a} + ${b})³`,
+          `Aplicar fórmula del cubo`,
+          `Expandir y simplificar`
+        ],
+        expandida: expandido,
+        numerico: 'Modo algebraico',
+        verificacion: true,
+        resultadoDirecto: expandido
+      };
+    }
+
+    function binomioCuboRestaAlgebraico(a, b) {
+      const expr = `(${a} - ${b})^3`;
+      const expandido = expandOrSimplify(expr);
+      return {
+        tipo: 'Binomio al Cubo (Resta)',
+        expresion: `(${a} - ${b})³`,
+        formula: '(a - b)³ = a³ - 3a²b + 3ab² - b³',
+        pasos: [
+          `Expresión: (${a} - ${b})³`,
+          `Aplicar fórmula del cubo con signos alternados`,
+          `Expandir y simplificar`
+        ],
+        expandida: expandido,
+        numerico: 'Modo algebraico',
+        verificacion: true,
+        resultadoDirecto: expandido
+      };
+    }
+
+    function terminoComunAlgebraico(a, b) {
+      const expr = `(x + (${a}))*(x + (${b}))`;
+      const expandido = expandOrSimplify(expr);
+      return {
+        tipo: 'Término Común',
+        expresion: `(x + ${a})(x + ${b})`,
+        formula: '(x + a)(x + b) = x² + (a+b)x + ab',
+        pasos: [
+          `Expresión: (x + ${a})(x + ${b})`,
+          `Distribuir y expandir`,
+          `Simplificar términos en x`
+        ],
+        expandida: expandido,
+        numerico: 'Modo algebraico',
+        verificacion: true,
+        resultadoDirecto: expandido
+      };
+    }
+
+    function conjugadosAlgebraico(a, b) {
+      const expr = `(${a} + ${b})*(${a} - ${b})`;
+      const expandido = expandOrSimplify(expr);
+      return {
+        tipo: 'Binomios Conjugados',
+        expresion: `(${a} + ${b})(${a} - ${b})`,
+        formula: '(a + b)(a - b) = a² - b²',
+        pasos: [
+          `Expresión: (${a} + ${b})(${a} - ${b})`,
+          `Aplicar diferencia de cuadrados`,
+          `Expandir y simplificar`
+        ],
+        expandida: expandido,
+        numerico: 'Modo algebraico',
+        verificacion: true,
+        resultadoDirecto: expandido
+      };
+    }
+
+    // =========================
+    // Mostrar resultados
+    // =========================
+    function mostrarResultados(resultado) {
+      expresionOriginal.textContent = resultado.expresion;
+      formula.textContent = resultado.formula;
+
+      desarrollo.innerHTML = '';
+      resultado.pasos.forEach(paso => {
+        const div = document.createElement('div');
+        div.textContent = '• ' + paso;
+        desarrollo.appendChild(div);
+      });
+
+      expandida.textContent = resultado.expandida;
+      resultadoNumerico.textContent = resultado.numerico;
+
+      if (resultado.verificacion) {
+        verificacion.textContent = `✓ Verificación correcta: ${resultado.resultadoDirecto}`;
+        verificacion.className = 'verification correcto';
+      } else {
+        verificacion.textContent = `✗ Error en verificación`;
+        verificacion.className = 'verification incorrecto';
+      }
+    }
+
+    // =========================
+    // Canvas
+    // =========================
+    function limpiarCanvas() {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#64748b';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Visualización geométrica', canvas.width/2, canvas.height/2 - 20);
+      ctx.fillText('disponible solo en', canvas.width/2, canvas.height/2);
+      ctx.fillText('modo numérico', canvas.width/2, canvas.height/2 + 20);
+      descripcionGeometrica.textContent = '';
+    }
+
+    function dibujarGeometria(tipo, a, b, resultado) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const scale = 30;
+
+      if (tipo === 'binomio-cuadrado-suma' || tipo === 'binomio-cuadrado-resta') {
+        const ladoBase = (tipo === 'binomio-cuadrado-suma') ? Math.abs(a + b) : Math.abs(a - b);
+        const lado = ladoBase * scale;
+        const x = centerX - lado / 2;
+        const y = centerY - lado / 2;
+
+        // Marco
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(x, y, lado, lado);
+
+        // Partes a², 2ab, b²
+        const aScaled = Math.abs(a) * scale;
+        const bScaled = Math.abs(b) * scale;
+
+        // a²
+        ctx.fillStyle = 'rgba(37, 99, 235, 0.3)';
+        ctx.fillRect(x, y, aScaled, aScaled);
+        ctx.strokeStyle = '#1e40af';
+        ctx.strokeRect(x, y, aScaled, aScaled);
+        ctx.fillStyle = '#1e293b';
+        ctx.font = '14px Arial';
+        ctx.fillText('a²', x + aScaled/2 - 8, y + aScaled/2 + 5);
+
+        // ab (dos rectángulos)
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+        ctx.fillRect(x + aScaled, y, bScaled, aScaled);
+        ctx.fillRect(x, y + aScaled, aScaled, bScaled);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillText('ab', x + aScaled + bScaled/2 - 10, y + aScaled/2 + 5);
+        ctx.fillText('ab', x + aScaled/2 - 10, y + aScaled + bScaled/2 + 5);
+
+        // b²
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.3)';
+        ctx.fillRect(x + aScaled, y + aScaled, bScaled, bScaled);
+        ctx.strokeStyle = '#dc2626';
+        ctx.strokeRect(x + aScaled, y + aScaled, bScaled, bScaled);
+        ctx.fillStyle = '#1e293b';
+        ctx.fillText('b²', x + aScaled + bScaled/2 - 8, y + aScaled + bScaled/2 + 5);
+
+        const areaNum = parseFloat(resultado.numerico) || 0;
+        const etiqueta = (tipo === 'binomio-cuadrado-suma') ? `(${a} + ${b})²` : `(${a} - ${b})²`;
+        descripcionGeometrica.textContent = `Área total = ${etiqueta} = ${areaNum} unidades²`;
+
+      } else if (tipo === 'conjugados') {
+        const a2 = Math.abs(a) * scale;
+        const b2 = Math.abs(b) * scale;
+
+        ctx.fillStyle = 'rgba(37, 99, 235, 0.3)';
+        ctx.fillRect(centerX - a2/2, centerY - a2/2, a2, a2);
+        ctx.strokeStyle = '#2563eb';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(centerX - a2/2, centerY - a2/2, a2, a2);
+
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+        ctx.fillRect(centerX - b2/2, centerY - b2/2, b2, b2);
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(centerX - b2/2, centerY - b2/2, b2, b2);
+
+        ctx.fillStyle = '#e2e8f0';
+        ctx.font = '16px Arial';
+        ctx.fillText('a²', centerX - a2/2 + 10, centerY - a2/2 + 20);
+        ctx.fillText('b²', centerX - 10, centerY + 5);
+
+        descripcionGeometrica.textContent = `Diferencia de áreas = ${a}² - ${b}² = ${resultado.numerico} unidades²`;
+      } else {
+        limpiarCanvas();
+      }
+    }
+
+    // =========================
+    // Historial
+    // =========================
+    function agregarAlHistorial(resultado) {
+      const item = {
+        fecha: new Date().toLocaleString('es-MX'),
+        tipo: resultado.tipo,
+        expresion: resultado.expresion,
+        resultado: resultado.expandida || resultado.numerico
+      };
+
+      // Evitar duplicados consecutivos idénticos
+      if (!historialCalculos.length ||
+          JSON.stringify(historialCalculos[0]) !== JSON.stringify(item)) {
+        historialCalculos.unshift(item);
+      }
+      if (historialCalculos.length > 10) historialCalculos.pop();
+
+      guardarHistorial();
+      mostrarHistorial();
+    }
+
+    function mostrarHistorial() {
+      if (historialCalculos.length === 0) {
+        historial.innerHTML = '<div class="historial-vacio">No hay cálculos en el historial</div>';
+        return;
+      }
+      historial.innerHTML = '';
+      historialCalculos.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'historial-item';
+        div.innerHTML = `
+          <strong>${item.tipo}</strong><br>
+          ${item.expresion} = ${item.resultado}<br>
+          <small>${item.fecha}</small>
+        `;
+        historial.appendChild(div);
+      });
+    }
+
+    function limpiarHistorial() {
+      if (confirm('¿Estás seguro de limpiar el historial?')) {
+        historialCalculos = [];
+        guardarHistorial();
+        mostrarHistorial();
+      }
+    }
+
+    function guardarHistorial() {
+      localStorage.setItem('historialProductosNotables', JSON.stringify(historialCalculos));
+    }
+
+    function cargarHistorial() {
+      const guardado = localStorage.getItem('historialProductosNotables');
+      if (guardado) historialCalculos = JSON.parse(guardado);
+    }
+  </script>
+</body>
+</html>
